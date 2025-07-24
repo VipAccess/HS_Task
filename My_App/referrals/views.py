@@ -5,11 +5,13 @@ import secrets
 
 from django.contrib.auth.models import User
 from django.core.cache import cache
+from django.shortcuts import get_object_or_404
+from django.template.defaulttags import querystring
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-from .serializers import PhoneSerializer
+from .serializers import PhoneSerializer, ProfileSerializer
 from .models import Profile
 
 
@@ -61,7 +63,7 @@ class VerifyAPIView(APIView):
             try:
                 user = User.objects.create_user(
                     username=f'user_{phone}',
-                    password=generate_code(15)
+                    password=generate_code()
                 )
                 invite_code = generate_code(6)
                 profile = Profile.objects.create(
@@ -81,3 +83,19 @@ class VerifyAPIView(APIView):
                     user.delete()
                 return Response({'error': str(e)},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ProfileAPIView(APIView):
+    def get(self, request, phone):
+        data = {'phone': phone}
+        serializer_phone = PhoneSerializer(data=data)
+
+        if serializer_phone.is_valid():
+            phone = serializer_phone.validated_data['phone']
+            try:
+                queryset = Profile.objects.get(phone=phone)
+            except Profile.DoesNotExist:
+                return Response({'detail': 'Номер не найден'})
+            serializer = ProfileSerializer(queryset)
+            return Response(serializer.data)
+        return Response({'detail': "Некорректный номер телефона"})

@@ -2,6 +2,8 @@ import re
 
 from rest_framework import serializers
 
+from .models import Profile
+
 
 class PhoneSerializer(serializers.Serializer):
     phone = serializers.CharField(max_length=15)
@@ -25,3 +27,9 @@ class PhoneSerializer(serializers.Serializer):
                 cleaned_phone) == 12 and cleaned_phone.startswith('375'):
                 representation['phone'] = '+375' + cleaned_phone[-9:]
         return representation
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['phone', 'invite_code', 'activated_invite']
