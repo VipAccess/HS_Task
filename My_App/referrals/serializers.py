@@ -22,6 +22,6 @@ class PhoneSerializer(serializers.Serializer):
             cleaned_phone = re.sub(r'\D', '', phone)
             if len(cleaned_phone) == 11 and cleaned_phone.startswith(
                     '8') or len(
-                    cleaned_phone) == 12 and cleaned_phone.startswith('375'):
+                cleaned_phone) == 12 and cleaned_phone.startswith('375'):
                 representation['phone'] = '+375' + cleaned_phone[-9:]
         return representation
