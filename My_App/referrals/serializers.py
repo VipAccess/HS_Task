@@ -2,7 +2,7 @@ import re
 
 from rest_framework import serializers
 
-from .models import Profile
+from .models import Profile, ReferralRelationship
 
 
 class PhoneSerializer(serializers.Serializer):
@@ -30,6 +30,12 @@ class PhoneSerializer(serializers.Serializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    invited_users = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
-        fields = ['phone', 'invite_code', 'activated_invite']
+        fields = ['phone', 'invite_code', 'activated_invite', 'invited_users']
+
+    def get_invited_users(self, obj):
+        referrals = ReferralRelationship.objects.filter(inviter=obj)
+        return [ref.referral.phone for ref in referrals]
